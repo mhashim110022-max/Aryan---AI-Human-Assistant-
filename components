@@ -1,0 +1,65 @@
+import React, { useEffect, useRef } from 'react';
+
+interface VisualizerProps {
+  volume: number; // 0 to 1
+  isActive: boolean;
+}
+
+export const Visualizer: React.FC<VisualizerProps> = ({ volume, isActive }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let currentRadius = 50;
+
+    const render = () => {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      // Interpolate radius for smoothness
+      const targetRadius = 50 + (volume * 150); // Scale up based on volume
+      currentRadius += (targetRadius - currentRadius) * 0.2;
+
+      // Draw Outer Glow
+      const gradient = ctx.createRadialGradient(centerX, centerY, currentRadius * 0.5, centerX, centerY, currentRadius * 1.5);
+      if (isActive) {
+        gradient.addColorStop(0, 'rgba(56, 189, 248, 0.8)'); // Light Blue
+        gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      } else {
+        gradient.addColorStop(0, 'rgba(148, 163, 184, 0.3)'); // Gray
+        gradient.addColorStop(1, 'rgba(148, 163, 184, 0)');
+      }
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // Draw Core
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+      ctx.fillStyle = isActive ? '#0ea5e9' : '#334155';
+      ctx.fill();
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => cancelAnimationFrame(animationId);
+  }, [volume, isActive]);
+
+  return (
+    <div className="relative w-full h-64 flex items-center justify-center">
+        <canvas ref={canvasRef} width={400} height={400} className="w-[300px] h-[300px]" />
+    </div>
+  );
+};

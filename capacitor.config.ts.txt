@@ -1,0 +1,8 @@
+import { CapacitorConfig } from '@capacitor/cli';
+const config: CapacitorConfig = {
+  appId: 'com.aryan.aiassistant',
+  appName: 'Aryan AI',
+  webDir: 'dist', // Ensure this matches your Vite build output directory
+  bundledWebRuntime: false
+};
+export default config;
